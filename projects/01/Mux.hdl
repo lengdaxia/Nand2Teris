@@ -14,7 +14,7 @@ CHIP Mux {
     OUT out;
 
     PARTS:
-    // Put your code here:
+    // out=a.sel^+b.sel
     Not(in=sel, out=notsel);
     And(a=a, b=notsel, out=andAnotSel);
     And(a=b, b=sel, out=andBSel);
