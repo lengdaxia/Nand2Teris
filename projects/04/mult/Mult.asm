@@ -10,3 +10,43 @@
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
 // Put your code here.
+
+// make R2 = 0
+@R2 
+M=0
+
+// if r0 > 0, goto loop
+@R0  
+D=M 
+@LOOP 
+D;JGT 
+
+// else goto end 
+@END 
+0;JMP 
+
+// if R0 > 0, goto loop else end
+(LOOP)
+    // get R2
+    @R2 
+    D=M 
+    // R2=R2+R1
+    @R1 
+    D=D+M 
+    @R2 
+    M=D
+
+    //R0=R0-1
+    @R0 
+    D=M-1 
+    M=D
+
+    // if R0 > 0 then loop else next
+    @LOOP
+    D;JGT
+
+(END)
+    @END
+    0;JMP
+
+
