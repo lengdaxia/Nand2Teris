@@ -39,5 +39,70 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // 111 a cccccc ddd jjj
+    // i  _  _  a  c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+    // 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
+
+    // A-instrcution: @1, 00000000000001, m1=0,
+    //  set A = 00000000000001,and RAM[A] = inM[16]
+    
+    // C-instruction: D=D+1;JMP
+    // 1110011111010111
+    // m1 00 m2 011111 101 111 
+
+    // A instrcution
+    // m1,instruction[0]
+    Not(in=instruction[15], out=notOp);
+    Mux16(a=aluOut, b=instruction, sel=notOp, out=m1Out);
+
+    // A register
+    Or(a=notOp, b=instruction[5], out=intoA);
+    ARegister(in=m1Out, load=intoA, out=A, out[0..14]=addressM);
+
+
+    //C instruction
+    // m2, instruction[12]
+    And(a=instruction[15], b=instruction[12], out=amSel);
+    Mux16(a=A, b=inM, sel=amSel, out=m2out);
+
+    //D
+    And(a=instruction[15], b=instruction[4], out=Dsel);
+    DRegister(in=aluOut, load=Dsel, out=Dout);
+
+    // ALU
+    ALU(x=Dout, y=m2out,out=aluOut, out=outM,
+        zx=instruction[11],
+        nx=instruction[10], 
+        zy=instruction[9], 
+        ny=instruction[8],
+        f=instruction[7], 
+        no=instruction[6], 
+        zr=zrOut, 
+        ng=ngOut);
+
+    // writeM load bit
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+
+    // pc
+    // Reset:=0
+    // 000 nojmp: ++
+    // 111 goto: =A
+    // 010 100 etc conditional goto:= A || ++
+    Not(in=ngOut, out=pos);
+    Not(in=zrOut, out=nzr);
+    And(a=instruction[15], b=instruction[0], out=jgt);
+    And(a=pos, b=nzr, out=posnzr);
+    And(a=jgt, b=posnzr, out=ld1);
+
+    And(a=instruction[15], b=instruction[1], out=jeq);
+    And(a=jeq, b=zrOut, out=ld2);
+
+    And(a=instruction[15], b=instruction[2], out=jlt);
+    And(a=jlt, b=ngOut, out=ld3);
+
+    Or(a=ld1, b=ld2, out=ldt);
+    Or(a=ldt, b=ld3, out=ld);
+
+    PC(in=A, load=ld, inc=true, reset=reset, out[0..14]=pc);
 }
