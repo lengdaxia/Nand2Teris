@@ -1,0 +1,50 @@
+
+## Assmbler
+file.asm -> binary code 
+- input: file.asm, output filename,
+- parser: read and parse an instruction
+- code: generate binary code 
+- symboltable: handle symbols
+
+
+## instruction
+A_INSTRUCTION for @xxx, where xxx is either a decimal number or a symbol
+C_INSTRUCTION for dest=comp;jump 
+L_INSTRUCTION for (label)
+
+current instruction
+    - hasMoreLines
+    - resolve instruction type from 4 types:
+        - @5 
+        - @sum
+        - D=0 
+        - (END)
+    - resolve symbols
+        - @sum -> sum 
+        - (LOOP) -> LOOP 
+    - resolve dest filed
+    - resolve comp filed 
+    - resolve jump filed 
+
+    
+A instructions
+@5
+
+@var 
+
+C instructions
+
+
+## symbols
+parse command to binary instruction code 
+
+- init a symble tables 
+- addEntry(symbol: string, address: int)
+- contains(symbol: string)
+- getAddress(symbol: string)
+
+### tables
+use json to store predefined instructions
+
+
+
