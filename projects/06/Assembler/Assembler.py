@@ -3,7 +3,7 @@
 from os.path import basename
 from sys import argv, exit
 from instruction import asm2hack
-from symbol import install 
+from ass_symbol import install 
 
 
 PROG = basename(argv[0])
@@ -11,7 +11,7 @@ PROG = basename(argv[0])
 def abort_assembly(nl=None, line=None, *args):
     print(PROG + ':error', end='')
     nl is not None and print(' on line ', nl)
-    print('\t>'+line.rstrip() if line else ': program argument')
+    print('\t >'+line.rstrip() if line else ': program argument')
     for l in args:
         print(l)
     exit(1)
@@ -31,8 +31,8 @@ def decomment(line):
     '''remove comments and external white space'''
     return line.split("//")[0].strip()
 
-with open(infile, 'Ur') as fi:
-    asm = fi.readlines
+with open(infile, 'r') as fi:
+    asm = fi.readlines()
 
 ninstr = 0 # instruction number
 #install tables to symbol tables
