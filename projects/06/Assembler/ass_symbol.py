@@ -3,7 +3,7 @@ import re
 from os.path import dirname, join
 
 re_symbol = re.compile('[$:.\w]+')
-digit = ('0','1','2','3','4','5','6','7','8','9')
+digit = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9') 
 addr = 15
 
 json_file = join(dirname(__file__), 'tables.json')
@@ -36,15 +36,19 @@ def install_label(name, defn):
     return symtab[label]
 
 def install_symbol(name):
+    print('install_symbol name;', name)
     if not_valid(name):
+        print('not_valid name;', name)
         return None
     symtab[name] = next_addr()
     return symtab[name]
 
 def install(name, defn=None):
+    print('install:',name)
     if defn is None:
         return install_symbol(name)
     return install_label(name, defn)
 
 def lookup(name):
+    # print('lookup: ',name)
     return symtab.get(name)

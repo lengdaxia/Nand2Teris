@@ -5,6 +5,7 @@ from os.path import dirname, join
 from ass_symbol import install, lookup
 
 re_asm = re.compile('[01ADMEGJLNPQT=;!+&|-]{1,11}')
+r_pattern = re.compile(r'^R(0|1[0-5])$')
 
 json_file = join(dirname(__file__), 'tables.json')
 with open(json_file) as f:
@@ -19,20 +20,14 @@ def int2hack(n):
     return '{:016b}\n'.format(n)
 
 def a_type(asm):
-    # print('a_type asm:',asm)
     expr = asm[1:] # remove '@'
-    # print('a_type expr:',expr)
+    print('a_type expr:',expr)
     if expr.isdigit():
         hack = int(expr)
-    elif expr.startswith('R'):
-        reg = expr[1:] # remove 'R'
-        if reg.isdigit():
-            reg = int(reg)
-            if 0 <= reg <= 15:
-                hack = reg 
+    elif r_pattern.match(expr): # R0~R15
+        hack = int(expr[1:]) # remove 'R'
     else:
         hack = lookup(expr) or install(expr)
-    
     if hack is None:
         return None
     
