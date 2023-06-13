@@ -1,4 +1,4 @@
-import sys 
+import sys, os
 
 ST = {
     "R0":0,
@@ -85,10 +85,13 @@ def main():
                 dest, comp, jump = parser(instruction)
                 binary_instruction = code_c_command(dest,comp, jump)
         
-        # write to output file   
-        out.write(binary_instruction + "\n")
+            # write to output file   
+            out.write(binary_instruction + "\n")
 
 
+    # remove temp.asm file 
+    os.remove('temp.asm')
+    
 
 def is_symbol(string):
     try:
@@ -110,10 +113,10 @@ def parser(c_instrcution):
 
     if len(parse1) == 2:
         dest = parse1[0].strip()
-        comp = parse1[1].split(';').strip()
+        comp = parse1[1].split(';')[0].strip()
     else:
         dest = None 
-        comp = parse1[0].split(';').strip()
+        comp = parse1[0].split(';')[0].strip()
     
     jump = c_instrcution.split(';')[-1].strip()
     if jump not in ["JEQ", "JNE", "JGT", "JGE", "JLT", "JLE", "JMP"]:
@@ -160,17 +163,49 @@ def code_c_command(dest, comp, jump):
         bin_comp = '101010'
     
     elif '1' in comp:
-        pass
+        if "-" in comp:
+            if "D" in comp:
+                # D - 1
+                bin_comp =  "001110"
+            elif "A" in comp or "M" in comp:
+                # A - 1 or M - 1
+                bin_comp =  "110010"
+            else:
+                # -1
+                bin_comp = "111010"
+        elif "+" in comp:
+            if "D" in comp:
+                # D + 1
+                bin_comp =  "011111"
+            elif "A" in comp or "M" in comp:
+                # A + 1 or M + 1
+                bin_comp = "110111"
+        else:
+            # 1
+            bin_comp = "111111"
     elif '!' in comp:
-        pass
+        if "D" in comp:
+            # !D
+            bin_comp = "001101"
+        else:
+            # !A or !M
+            bin_comp = "110001"
     elif '&' in comp:
-        pass
+        # D & A or D & M
+        bin_comp = "000000"
     elif '|' in comp:
-        pass
+        # D|A or D|M
+        bin_comp = "010101"
     elif 'D' in comp and '+' in comp:
-        pass
+        # D+A or D+M
+        bin_comp = "000010"
     elif 'D' in comp and ('A' in comp or 'M' in comp):
-        pass
+        # Must be D-A, D-M, A-D, or M-D
+        if comp.index("D") < comp.index("-"):
+            bin_comp = "010011"
+        else:
+            bin_comp = "000111"
+
     else:
         #  must be D or A or M
         if 'D' in comp:
