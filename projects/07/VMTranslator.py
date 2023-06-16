@@ -124,7 +124,11 @@ def label(label_name,function_name):
     pass
 
 def init():
-    pass
+    asm_code = ["// init",
+                "@256",
+                "D=A",
+                "@SP",
+                "M=D"]
 
 def function(function_name, n_vars):
     pass
