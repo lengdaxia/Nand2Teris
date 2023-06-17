@@ -78,7 +78,7 @@ def main(file_or_dir):
                         current_function = arg1
                     
                     for instruction in asm_instrctions:
-                        asm.write(instrcution + '\n')
+                        asm.write(instruction + '\n')
 
 
 def parse(command):
@@ -169,10 +169,92 @@ def arithmetic(operation):
         return []
 
 def push(mem_seg,index):
-    pass
+    if mem_seg == 'constant':
+        return [
+            f"// push constant {index}",
+            "@" + str(index),
+            "D=A", #current A value store in D register 
+            "@SP", # point to SP counter, A = *SP, M=RAM[A]
+            "AM=M+1", # *A += 1, and RAM[A] += 1 => SP value += 1
+            "A=A-1", # RAM[A-1] selected
+            "M=D" # RAM[A-1] = D, the constant vlaue
+        ]
+    elif mem_seg in ['static', 'temp']:
+        global file_name
+        storage = file_name + str(index) if mem_seg == 'static' else "R" + str(5 + int(index))
+        return [
+            f"// push {mem_seg} {index}",
+            f"@{storage}",
+            "D=M",
+            "@SP",
+            "AM=M+1",
+            "A=A-1",
+            "M=D"
+        ]
+    elif mem_seg == 'pointer':
+        pointer = "THIS" if index == '0' else "THAT"
+        return [
+            f"// push {mem_seg} {index}",
+            f"@{pointer}",
+            "D=M",
+            "@SP",
+            "AM=M+1",
+            "A=A-1",
+            "M=D"
+        ]
+    else: # mem_seg = local, argument, this, that
+        return [
+            f"// push {mem_seg} {index}",
+            "@" + str(index),
+            "D=A",
+            "@" + mem_seg_to_pointer[mem_seg],
+            "A=D+M",
+            "D=M",
+            "@SP",
+            "AM=M+1",
+            "A=A-1",
+            "M=D"
+        ]
 
 def pop(mem_seg, index):
-    pass
+    """: returns list of hack assembly instructions to pop mem_seg_index"""
+    if mem_seg in ['static', 'temp']:
+        global file_name
+        # storage can be Foo.3, or R8 if index = 3
+        storage = file_name + str(index) if mem_seg == 'static' else 'R' + str(5+int(index))
+        return [
+            f"// pop {mem_seg} {index}",
+            "@SP",
+            "AM=M-1",
+            "D=M",
+            f"@{storage}",
+            "M=D"
+        ]
+    elif mem_seg == 'pointer':
+        pointer = 'THIS' if index == '0' else 'THAT'
+        return [
+            f"// pop {mem_seg} {index}"
+            "@SP",
+            "AM=M-1",
+            "D=M",
+            f"@{pointer}",
+            "M=D"
+        ]
+    else: # mem_seg = local, argument, this, that
+        return [
+            f"// pop {mem_seg} {index}",
+            "@" + str(index),
+            "D=A",
+            "@" + mem_seg_to_pointer[mem_seg],
+            "D=D+M",
+            "@SP",
+            "AM=M-1",
+            "D=D+M",
+            "A=D-M",
+            "M=D-A"
+        ]
+
+
 
 def label(label_name,function_name):
     return [
@@ -271,7 +353,26 @@ def get_return():
         "@LCL",
         "AM=M-1",
         "D=M",
-        "@THAT"
+        "@THAT",
+        "M=D",
+        "@LCL",
+        "AM=M-1",
+        "D=M",
+        "@THIS",
+        "M=D",
+        "@LCL",
+        "AM=M-1",
+        "D=M",
+        "@ARG",
+        "M=D",
+        "@LCL",
+        "AM=M-1",
+        "D=M",
+        "@LCL",
+        "M=D",
+        "@retAddr",
+        "A=M",
+        "0; JMP"
     ]
 
 def goto(label_name,function_name):
