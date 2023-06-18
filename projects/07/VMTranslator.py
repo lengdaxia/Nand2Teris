@@ -24,7 +24,7 @@ def main(file_or_dir):
     if os.path.isdir(file_or_dir):
         for (dirpath, dirnames, filenames) in os.walk(file_or_dir):
             for file in filenames:
-                if file.endswidth('.vm'):
+                if file.endswith('.vm'):
                     input_files.append(os.path.join(dirpath, file))
             if file_or_dir.endswith('/'):
                 file_name = os.path.basename(file_or_dir[:-1])
@@ -132,7 +132,7 @@ def arithmetic(operation):
             f"M={op}M"
         ]
     elif operation in ['eq', 'gt','lt']:
-        jump_op = {'op': 'JNE','gt':'JLE','lt':'JGE'}[operation]
+        jump_op = {'eq': 'JNE','gt':'JLE','lt':'JGE'}[operation]
         global num_labeled
         num_labeled += 1
         return [
